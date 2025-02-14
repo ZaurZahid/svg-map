@@ -99,8 +99,7 @@ export function useSelectElements(
         const transformed = svgRef.current!.createSVGPoint();
         transformed.x = point.x;
         transformed.y = point.y;
-        const absolutePoint = transformed.matrixTransform(ctm);
-        return absolutePoint;
+        return transformed.matrixTransform(ctm);
       });
 
       // Find the extremes of the transformed points
