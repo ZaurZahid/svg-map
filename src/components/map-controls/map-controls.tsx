@@ -1,5 +1,6 @@
 import "./map-controls.css";
 import type { FC } from "react";
+import Image from "next/image";
 import minusIcon from "@/assets/img/minus.png";
 import plusIcon from "@/assets/img/add.png";
 
@@ -14,10 +15,24 @@ export const ZoomControls: FC<ZoomControlsProps> = ({
 }) => (
   <div className={"map-controls"}>
     <button onClick={onZoomOut} className={"zoom-btn"}>
-      <img className={"zoom-icon"} src={minusIcon.src} alt="Zoom Out" width={44} height={44} />
+      <Image 
+        className={"zoom-icon"} 
+        src={minusIcon.src} 
+        alt="Zoom Out" 
+        width={44} 
+        height={44} 
+        priority
+      />
     </button>
     <button onClick={onZoomIn} className={"zoom-btn"}>
-      <img className={"zoom-icon"} src={plusIcon.src} alt="Zoom In" width={44} height={44} />
+      <Image 
+        className={"zoom-icon"} 
+        src={plusIcon.src} 
+        alt="Zoom In" 
+        width={44} 
+        height={44} 
+        priority
+      />
     </button>
   </div>
 );
