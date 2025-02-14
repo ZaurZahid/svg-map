@@ -187,24 +187,19 @@ export function useSelectElements(
 
       console.log('Element clicked:', { id, isSelected });
 
-      if (selectedIds.current.size >= 100 && !isSelected) {
-        console.log('Selection limit reached');
-        return alert("You can only select up to 100 items at a time.");
-      }
-
       if (!svgRef?.current || !zoomBehavior?.current) {
         console.log('SVG or zoom behavior not available');
         return;
       }
 
-      // Toggle selection state
-      element.classed("selected", !isSelected);
+      // Clear all existing selections
+      clickableElementsSelect.classed("selected", false);
+      selectedIds.current.clear();
 
-      // Update selected IDs
+      // Select new element if it wasn't already selected
       if (!isSelected) {
+        element.classed("selected", true);
         selectedIds.current.add(id);
-      } else {
-        selectedIds.current.delete(id);
       }
 
       console.log('Updated selection count:', selectedIds.current.size);
