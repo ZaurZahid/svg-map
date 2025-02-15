@@ -14,16 +14,6 @@ export const ZoomControls: FC<ZoomControlsProps> = ({
   onZoomOut,
 }) => (
   <div className={"map-controls"}>
-    <button onClick={onZoomOut} className={"zoom-btn"}>
-      <Image 
-        className={"zoom-icon"} 
-        src={minusIcon.src} 
-        alt="Zoom Out" 
-        width={44} 
-        height={44} 
-        priority
-      />
-    </button>
     <button onClick={onZoomIn} className={"zoom-btn"}>
       <Image 
         className={"zoom-icon"} 
@@ -34,5 +24,16 @@ export const ZoomControls: FC<ZoomControlsProps> = ({
         priority
       />
     </button>
+    <button onClick={onZoomOut} className={"zoom-btn"}>
+      <Image 
+        className={"zoom-icon"} 
+        src={minusIcon.src} 
+        alt="Zoom Out" 
+        width={44} 
+        height={44} 
+        priority
+      />
+    </button>
+    
   </div>
 );
