@@ -126,7 +126,7 @@ export function useSelectElements(
     const padding = Math.min(svgWidth, svgHeight) * 0.05;
     const paddedBounds = {
       x: selectedBounds.x - padding,
-      y: selectedBounds.y - padding,
+      y: selectedBounds.y - padding + 30,
       width: selectedBounds.width + padding * 2,
       height: selectedBounds.height + padding * 2
     };
