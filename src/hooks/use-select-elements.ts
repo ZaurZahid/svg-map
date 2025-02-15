@@ -11,6 +11,7 @@ export function useSelectElements(
   const searchParams = useSearchParams();
 
   const selectedIds = useRef<Set<string>>(new Set());
+  const isTransitioning = useRef(false);
 
   useEffect(() => {
     // Initialize selected IDs from URL
@@ -67,6 +68,9 @@ export function useSelectElements(
       console.log('SVG or zoom behavior not available');
       return;
     }
+
+    isTransitioning.current = true;
+    console.log('Starting transition, lock enabled');  // Debug log
 
     const selectedElements = Array.from(selectedIds.current)
       .map(id => document.getElementById(id) as SVGGraphicsElement | null)
@@ -149,9 +153,17 @@ export function useSelectElements(
     // Apply transform with a single smooth transition
     d3.select(svgRef.current)
       .transition()
-      .duration(750) // Increased duration for smoother animation
-      .ease(d3.easeCubicOut) // Added easing function for smoother motion
-      .call(zoomBehavior.current.transform, transform);
+      .duration(750)
+      .ease(d3.easeCubicOut)
+      .call(zoomBehavior.current.transform, transform)
+      .on('end', () => {
+        isTransitioning.current = false;
+        console.log('Transition ended, lock disabled');  // Debug log
+      })
+      .on('interrupt', () => {  // Add interrupt handler
+        isTransitioning.current = false;
+        console.log('Transition interrupted, lock disabled');  // Debug log
+      });
   };
 
   useEffect(() => {
@@ -170,6 +182,11 @@ export function useSelectElements(
 
     // Click handler for selectable elements
     clickableElementsSelect.on("click", function (event) {
+      if (isTransitioning.current) {
+        event.stopPropagation();
+        return;
+      }
+
       event.stopPropagation();
       const element = d3.select(this);
       const id = this.id;
