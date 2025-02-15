@@ -149,7 +149,7 @@ export function useSelectElements(
     // Apply transform with a single smooth transition
     d3.select(svgRef.current)
       .transition()
-      .duration(500) // Increased duration for smoother animation
+      .duration(1250) // Increased duration for smoother animation
       .ease(d3.easeCubicOut) // Added easing function for smoother motion
       .call(zoomBehavior.current.transform, transform);
   };
