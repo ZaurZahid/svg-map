@@ -72,7 +72,6 @@ export function useSelectElements(
       .map(id => document.getElementById(id) as SVGGraphicsElement | null)
       .filter((el): el is SVGGraphicsElement => el !== null);
 
-    console.log('Selected elements:', selectedElements.length, selectedElements);
     if (selectedElements.length === 0) return;
 
     // Get the overall SVG bounds for reference
@@ -81,7 +80,6 @@ export function useSelectElements(
       console.log('Could not determine SVG bounds');
       return;
     }
-    console.log('SVG bounds:', svgBounds);
 
     // Calculate bounds of selected elements
     const selectedBounds = selectedElements.reduce((acc, element) => {
@@ -102,13 +100,10 @@ export function useSelectElements(
         return transformed.matrixTransform(ctm);
       });
 
-      // Find the extremes of the transformed points
       const minX = Math.min(...points.map(p => p.x));
       const minY = Math.min(...points.map(p => p.y));
       const maxX = Math.max(...points.map(p => p.x));
       const maxY = Math.max(...points.map(p => p.y));
-
-      console.log('Element transformed bounds:', element.id, { minX, minY, maxX, maxY });
 
       if (!acc) {
         return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
@@ -122,31 +117,28 @@ export function useSelectElements(
       };
     }, null as null | { x: number; y: number; width: number; height: number });
 
-    console.log('Selected bounds:', selectedBounds);
     if (!selectedBounds) return;
 
-    // Get current SVG dimensions
     const svgWidth = svgRef.current.clientWidth;
     const svgHeight = svgRef.current.clientHeight;
-    console.log('SVG dimensions:', { svgWidth, svgHeight });
 
     // Add padding (5% of the smaller dimension)
     const padding = Math.min(svgWidth, svgHeight) * 0.05;
-    selectedBounds.x -= padding;
-    selectedBounds.y -= padding;
-    selectedBounds.width += padding * 2;
-    selectedBounds.height += padding * 2;
+    const paddedBounds = {
+      x: selectedBounds.x - padding,
+      y: selectedBounds.y - padding,
+      width: selectedBounds.width + padding * 2,
+      height: selectedBounds.height + padding * 2
+    };
 
     // Calculate scale to fit the selection
-    const scaleX = svgWidth / selectedBounds.width;
-    const scaleY = svgHeight / selectedBounds.height;
+    const scaleX = svgWidth / paddedBounds.width;
+    const scaleY = svgHeight / paddedBounds.height;
     const scale = Math.min(Math.min(scaleX, scaleY), 4);
-    console.log('Scale factors:', { scaleX, scaleY, finalScale: scale });
 
     // Calculate the center point of the bounds
-    const centerX = selectedBounds.x + selectedBounds.width / 2;
-    const centerY = selectedBounds.y + selectedBounds.height / 2;
-    console.log('Center point:', { centerX, centerY });
+    const centerX = paddedBounds.x + paddedBounds.width / 2;
+    const centerY = paddedBounds.y + paddedBounds.height / 2;
 
     // Create transform
     const transform = d3.zoomIdentity
@@ -154,12 +146,11 @@ export function useSelectElements(
       .scale(scale)
       .translate(-centerX, -centerY);
 
-    console.log('Final transform:', transform);
-
-    // Apply transform with transition
+    // Apply transform with a single smooth transition
     d3.select(svgRef.current)
       .transition()
-      .duration(750)
+      .duration(500) // Increased duration for smoother animation
+      .ease(d3.easeCubicOut) // Added easing function for smoother motion
       .call(zoomBehavior.current.transform, transform);
   };
 
@@ -203,6 +194,7 @@ export function useSelectElements(
 
       console.log('Updated selection count:', selectedIds.current.size);
 
+      // Update URL params first (without triggering a re-render)
       const params = new URLSearchParams(searchParams.toString());
       const selectedString = Array.from(selectedIds.current).join(",");
 
@@ -212,10 +204,15 @@ export function useSelectElements(
         params.delete("ids");
       }
 
-      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-
+      // Perform zoom first, then update URL
       if (selectedIds.current.size > 0) {
         zoomToSelectedElements();
+        // Update URL after animation starts
+        setTimeout(() => {
+          router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+        }, 0);
+      } else {
+        router.replace(`${pathname}?${params.toString()}`, { scroll: false });
       }
     });
   }, [pathname, router, searchParams, svgRef, zoomBehavior]);
